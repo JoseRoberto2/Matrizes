@@ -1,10 +1,9 @@
 #include "matrix.h"
-#include <cstdlib>
-#include <iostream>
+
 
 //#####Início Verificação de tipos de Matrizes#####//
-
-bool Matrix::sqr(Matrix Mat1)//Verifica se a matriz é quadrada.
+template <class UsedType>
+bool Matrix<UsedType>::sqr(Matrix<UsedType> Mat1)//Verifica se a matriz é quadrada.
 {
     bool vef;
 
@@ -16,7 +15,8 @@ bool Matrix::sqr(Matrix Mat1)//Verifica se a matriz é quadrada.
     return vef;
 }
 
-bool Matrix::ind(Matrix Mat1)//Verifica se a matriz é identidade.
+template <class UsedType>
+bool Matrix<UsedType>::ind(Matrix<UsedType> Mat1)//Verifica se a matriz é identidade.
 {
     bool vef;
     int x = 0, a = 0, b = 0;
@@ -63,59 +63,43 @@ bool Matrix::ind(Matrix Mat1)//Verifica se a matriz é identidade.
 
 //#####Início Construtores e Destrutores da Classe#####//
 
-Matrix::Matrix() //Inicializa linhas e colunas com zero
+template <class UsedType>
+Matrix<UsedType>::Matrix() //Inicializa linhas e colunas com zero
 {
     this->rows = 0;
     this->cols = 0;
-    this->MatOriginalRows = 0;
-    this->MatOriginalCols = 0;
-    this->vet1Rows = 0;
-    this->vet1Cols = 0;
-    this->vet2Rows = 0;
-    this->vet2Cols = 0;
 }
 
-Matrix::Matrix(int row, int col)//Inicializa a Matriz com as linhas e colunas determinadas.
+template <class UsedType>
+Matrix<UsedType>::Matrix(string value) //Inicializa linhas e colunas com zero
+{
+    this->rows = 0;
+    this->cols = 0;
+    this->init(value);
+}
+
+template <class UsedType>
+Matrix<UsedType>::Matrix(unsigned row, unsigned col)//Inicializa a Matriz com as linhas e colunas determinadas.
 {
     this->init(row, col);
-    this->MatOriginalRows = 0;
-    this->MatOriginalCols = 0;
-    this->vet1Rows = 0;
-    this->vet1Cols = 0;
-    this->vet2Rows = 0;
-    this->vet2Cols = 0;
 }
 
-Matrix::Matrix(const Matrix & otherMatrix)//Cria uma cópia da Matriz
+template <class UsedType>
+Matrix<UsedType>::Matrix(const Matrix<UsedType> & otherMatrix)//Cria uma cópia da Matriz
 {
 
     this->init(otherMatrix.rows, otherMatrix.cols);
-    for (int i = 0; i < this->rows; i++)
-        for (int j = 0; j < this->cols; j++)
+    for (unsigned i = 0; i < this->rows; i++)
+        for (unsigned j = 0; j < this->cols; j++)
             this->Mat[i][j] = otherMatrix.Mat[i][j];
-
-    this->initMatOriginal(otherMatrix.MatOriginalRows, otherMatrix.MatOriginalCols);
-    for (int i = 0; i < this->MatOriginalRows; i++)
-        for (int j = 0; j < this->MatOriginalCols; j++)
-            this->MatOriginal[i][j] = otherMatrix.MatOriginal[i][j];
-
-    this->initVet1(otherMatrix.vet1Rows, otherMatrix.vet1Cols);
-    for (int i = 0; i < this->vet1Rows; i++)
-        for (int j = 0; j < this->vet1Cols; j++)
-            this->vet1[i][j] = otherMatrix.vet1[i][j];
-
-    this->initVet2(otherMatrix.vet2Rows, otherMatrix.vet2Cols);
-    for (int i = 0; i < this->vet2Rows; i++)
-        for (int j = 0; j < this->vet2Cols; j++)
-            this->vet2[i][j] = otherMatrix.vet2[i][j];
-
 }
 
-Matrix::~Matrix()//Destrutor da Classe Matriz
+template <class UsedType>
+Matrix<UsedType>::~Matrix()//Destrutor da Classe Matriz
 {
     if ((this->rows != 0) && (this->cols != 0))
     {
-        for (int i = 0; i < this->rows; i++)
+        for (unsigned i = 0; i < this->rows; i++)
         {
             free(this->Mat[i]);
             this->Mat[i] = NULL;
@@ -125,89 +109,23 @@ Matrix::~Matrix()//Destrutor da Classe Matriz
         this->cols = 0;
         this->Mat = NULL;
     }
-
-    if ((this->MatOriginalRows != 0) && (this->MatOriginalCols != 0))
-    {
-        for (int i = 0; i < this->MatOriginalRows; i++)
-        {
-            free(this->MatOriginal[i]);
-            this->MatOriginal[i] = NULL;
-        }
-        free(this->MatOriginal);
-        this->MatOriginalRows = 0;
-        this->MatOriginalCols = 0;
-        this->MatOriginal = NULL;
-    }
-
-    if ((this->vet1Rows != 0) && (this->vet1Cols != 0))
-    {
-        for (int i = 0; i < this->vet1Rows; i++)
-        {
-            free(this->vet1[i]);
-            this->vet1[i] = NULL;
-        }
-        free(this->vet1);
-        this->vet1Rows = 0;
-        this->vet1Cols = 0;
-        this->vet1 = NULL;
-    }
-
-    if ((this->vet2Rows != 0) && (this->vet2Cols != 0))
-    {
-        for (int i = 0; i < this->vet2Rows; i++)
-        {
-            free(this->vet2[i]);
-            this->vet2[i] = NULL;
-        }
-        free(this->vet2);
-        this->vet2Rows = 0;
-        this->vet2Cols = 0;
-        this->vet2 = NULL;
-    }
-
-
 }
 //#####Fim Construtores e Destrutores da Classe#####//
 
 //#####Início Métodos de Inicialização de Matrizes#####//
 
-void Matrix::init(int row, int col)//Aloca o espaço de memória para a Matriz e inicializa com 0
+template <class UsedType>
+void Matrix<UsedType>::init(unsigned row, unsigned col)//Aloca o espaço de memória para a Matriz e inicializa com 0
 {
-    this->Mat = (float**)calloc(col,(row)*sizeof(float*)); //Cria as linhas
-    for (int i = 0; i < row; i++)
-        this->Mat[i] = (float*)calloc(row,(col)*sizeof(float)); //Cria as colunas
+    this->Mat = (UsedType**)calloc(col,(row)*sizeof(UsedType*)); //Cria as linhas
+    for (unsigned i = 0; i < row; i++)
+        this->Mat[i] = (UsedType*)calloc(col,(col)*sizeof(UsedType)); //Cria as colunas
     this->rows = row;
     this->cols = col;
 }
 
-void Matrix::initMatOriginal(int row, int col)
-{
-    this->MatOriginal = (float**)calloc(col,(row)*sizeof(float*)); //Cria as linhas
-    for (int i = 0; i < row; i++)
-        this->MatOriginal[i] = (float*)calloc(row,(col)*sizeof(float)); //Cria as colunas
-    this->MatOriginalRows = row;
-    this->MatOriginalCols = col;
-}
-
-void Matrix::initVet1(int row, int col)
-{
-    this->vet1 = (float**)calloc(col,(row)*sizeof(float*)); //Cria as linhas
-    for (int i = 0; i < row; i++)
-        this->vet1[i] = (float*)calloc(row,(col)*sizeof(float)); //Cria as colunas
-    this->vet1Rows = row;
-    this->vet1Cols = col;
-}
-
-void Matrix::initVet2(int row, int col)
-{
-    this->vet2 = (float**)calloc(col,(row)*sizeof(float*)); //Cria as linhas
-    for (int i = 0; i < row; i++)
-        this->vet2[i] = (float*)calloc(row,(col)*sizeof(float)); //Cria as colunas
-    this->vet2Rows = row;
-    this->vet2Cols = col;
-}
-
-void Matrix::init(string value)//Inicializa a Matriz com uma cadeia de strings como entrada
+template <class UsedType>
+void Matrix<UsedType>::init(string value)//Inicializa a Matriz com uma cadeia de strings como entrada
 {
     int posComma, posSemiComma, col = 1, row = 1;
     string temp;
@@ -229,7 +147,7 @@ void Matrix::init(string value)//Inicializa a Matriz com uma cadeia de strings c
                 posComma = temp.length();
 
             string temp2 = temp.substr(0, posComma);
-            float num = atof(temp2.c_str());
+            UsedType num = (UsedType)atof(temp2.c_str());
             this->add(row, col, num);
             temp.erase(0, posComma+1);
             col++;
@@ -240,79 +158,149 @@ void Matrix::init(string value)//Inicializa a Matriz com uma cadeia de strings c
     }
 }
 
-void Matrix::add(int row, int col, float number)//Adiciona valores a matriz,
-{                                               //se tiver valores maiores que as dimensões da matriz,
-    int tempRow, tempCol;                       //coloca o valor na posição indicada completando o resto com 0
+template <class UsedType>
+void Matrix<UsedType>::add(unsigned row, unsigned col, UsedType number)//Adiciona valores a matriz,
+{                                               //se tiver valores maiores que as dimensões da matriz, coloca o valor na posição indicada completando o resto com 0
+     Matrix<UsedType> Temp;
 
-    if(this->rows < row)
-        tempRow = row;
-    else
-        tempRow = this->rows;
-    if(this->cols < col)
-        tempCol = col;
-    else
-        tempCol = this->cols;
-
-    Matrix Temp(tempRow, tempCol);
-    if((this->rows != 0) && (this->cols != 0))
+    if (this->rows < row || this->cols < col)
     {
-        for(int i = 0; i < this->rows; i++)
-            for (int j = 0; j < this->cols; j++)
-                Temp.Mat[i][j] = this->Mat[i][j];
+        if(this->rows == 0 || this->cols == 0)
+            this->init(1,1);
+
+        if (this->rows < row && row > 0)
+           Temp.init(row, this->cols);
+        else
+           Temp.init(this->rows, col);
+
+        if((this->rows != 0) && (this->cols != 0))
+        {
+            for(unsigned i = 0; i < this->rows; i++)
+                for (unsigned j = 0; j < this->cols; j++)
+                    Temp.Mat[i][j] = this->Mat[i][j];
+        }
+        Temp.Mat[row-1][col-1] = number;
+        this->init(Temp.rows, Temp.cols);
+
+        for(unsigned i = 0; i < this->rows; i++)
+            for (unsigned j = 0; j < this->cols; j++)
+                this->Mat[i][j] = Temp.Mat[i][j];
     }
+    else
+        this->Mat[row-1][col-1] = number;
 
-    Temp.Mat[row-1][col-1] = number;
-    this->init(tempRow, tempCol);
-
-    for(int i = 0; i < Temp.rows; i++)
-        for (int j = 0; j < Temp.cols; j++)
-            this->Mat[i][j] = Temp.Mat[i][j];
 
 }
 
-void Matrix::eye(int num)//Gera uma Matriz Identidade, entrando como parâmetro a dimensão quadrada da Matriz
+template <class UsedType>
+void Matrix<UsedType>::eye(unsigned num)//Gera uma Matriz Identidade, entrando como parâmetro a dimensão quadrada da Matriz
 {
     this->init(num,num);
-    for(int i = 0; i < this->rows; i++)
-        for (int j = 0; j < this->cols; j++)
+    for(unsigned i = 0; i < this->rows; i++)
+        for (unsigned j = 0; j < this->cols; j++)
             if (i == j)
                 this->Mat[i][j] = 1;
 
 }
 
-void Matrix::ones(int row, int col)//Cria uma matriz preenchida com 1s.
+template <class UsedType>
+void Matrix<UsedType>::ones(unsigned row, unsigned col)//Cria uma matriz preenchida com 1s.
 {
-    for (int i = 0; i < row; i++)
-        for (int j = 0; j < col; j++)
+    this->init(row, col);
+    for (unsigned i = 0; i < row; i++)
+        for (unsigned j = 0; j < col; j++)
             this->Mat[i][j] = 1;
 }
 
-void Matrix::zeros(int row, int col)//Gera uma Matriz de Zeros, tendo como entrada as dimensões indicadas.
+template <class UsedType>
+void Matrix<UsedType>::zeros(unsigned row, unsigned col)//Gera uma Matriz de Zeros, tendo como entrada as dimensões indicadas.
 {
     this->init(row, col);
+    for(unsigned i = 0; i < row; i++)
+        for(unsigned j = 0; j < col; j++)
+            this->Mat[i][j] = 0;
 }
 
-void Matrix::print()//Imprime a Matriz na Tela
+template <class UsedType>
+void Matrix<UsedType>::randU(unsigned row, unsigned col)
 {
-    cout<<"\n";
-    for (int i = 0; i< this->rows; i++)
-    {
-        for (int j = 0; j< this->cols; j++)
+    srand((time(NULL)));
+    UsedType t;
+    this->init(row, col);
+    for(unsigned i = 0; i < this->rows; i++)
+        for(unsigned j = 0; j < this->cols; j++)
         {
-            printf("%6.2f", this->Mat[i][j]);
-//            cout<<" ";
+            t = (UsedType)rand()/RAND_MAX;
+            this->Mat[i][j] = t;
         }
-        cout<<endl;
-    }
 }
 
-void Matrix::printMatOr()//Imprime a Matriz na Tela
+template <class UsedType>
+unsigned Matrix<UsedType>::length()
+{
+    unsigned tam;
+
+    if(this->rows > this->cols)
+        tam = this->rows;
+    else
+        tam = this->cols;
+
+    return tam;
+}
+
+template <class UsedType>
+Matrix<UsedType> Matrix<UsedType>::Avarage()
+{
+    Matrix<UsedType> ret;
+    ret.zeros(1, this->cols);
+    for(unsigned i = 0; i < this->rows; i++)
+        for(unsigned j = 0; j < this->cols; j++)
+            ret.Mat[0][j] = ret.Mat[0][j] + (this->Mat[i][j])/this->cols;
+
+    return ret;
+}
+
+template <class UsedType>
+Matrix<UsedType> Matrix<UsedType>::Variance()
+{
+    Matrix<UsedType> Media, ret;
+
+    Media = this->Avarage();
+    ret.zeros(1, this->cols);
+    for(unsigned i = 0; i < this->rows; i++)
+        for(unsigned j = 0; j < this->cols; j++)
+            ret.Mat[0][j] = ret.Mat[0][j] + pow((this->Mat[i][j]-Media.Mat[0][j]),2)/this->cols;
+
+    return ret;
+
+
+}
+
+template <class UsedType>
+Matrix<UsedType> Matrix<UsedType>::Std()
+{
+    Matrix<UsedType> ret, Variancia;
+
+    Variancia = this->Variance();
+    ret.zeros(1, this->cols);
+
+    for(unsigned i = 0; i < this->rows; i++)
+        ret.Mat[0][i] = sqrt(Variancia.Mat[0][i]);
+
+    return ret;
+}
+
+template <class UsedType>
+void Matrix<UsedType>::print()//Imprime a Matriz na Tela
 {
     cout<<"\n";
-    for (int i = 0; i< this->MatOriginalRows; i++)
+    for (unsigned i = 0; i< this->rows; i++)
     {
-        for (int j = 0; j< this->MatOriginalCols; j++)
-            cout<<this->MatOriginal[i][j]<<" ";
+        for (unsigned j = 0; j< this->cols; j++)
+        {
+            printf("%6.3f", (float)this->Mat[i][j]);
+            cout<<" ";
+        }
         cout<<endl;
     }
 }
@@ -322,142 +310,83 @@ void Matrix::printMatOr()//Imprime a Matriz na Tela
 //#####Início Sobrecarga de Operadores#####//
 
 //-----Início Operadores de Soma-----//
-Matrix Matrix::operator +(Matrix Mat1)//Operador de soma Matriz Matriz
+template <class UsedType>
+Matrix<UsedType> Matrix<UsedType>::operator +(Matrix<UsedType> Mat1)//Operador de soma Matriz Matriz
 {
-    Matrix Ret(this->rows, this->cols);
+    Matrix<UsedType> Ret(this->rows, this->cols);
 
-    for(int i = 0; i < this->rows; i++)
-        for (int j = 0; j < this->cols; j++)
+    for(unsigned i = 0; i < this->rows; i++)
+        for (unsigned j = 0; j < this->cols; j++)
             Ret.Mat[i][j] = this->Mat[i][j] + Mat1.Mat[i][j];
 
     return Ret;
 }
 
-Matrix Matrix::operator +(float a)//Operador de soma Escalar Matriz
+template <class UsedType>
+Matrix<UsedType> Matrix<UsedType>::operator +(UsedType a)//Operador de soma Escalar Matriz
 {
-    Matrix Ret(this->rows, this->cols);
+    Matrix<UsedType> Ret(this->rows, this->cols);
 
-    for(int i = 0; i < this->rows; i++)
-        for (int j = 0; j < this->cols; j++)
+    for(unsigned i = 0; i < this->rows; i++)
+        for (unsigned j = 0; j < this->cols; j++)
             Ret.Mat[i][j] = this->Mat[i][j] + a;
 
     return Ret;
 }
 
-Matrix operator+(float a, Matrix Mat1)//Operador de soma Matriz Escalar
+template <class UsedType>
+Matrix<UsedType> operator+(UsedType a, Matrix<UsedType> Mat1)//Operador de soma Matriz Escalar
 {
     return Mat1+a;
 }
 //-----Fim Operadores de Soma-----//
 
 //-----Início Operadores de Subtração-----//
-Matrix Matrix::operator -(Matrix Mat1)//Operador de subtração Matriz Matriz
+template <class UsedType>
+Matrix<UsedType> Matrix<UsedType>::operator -(Matrix<UsedType> Mat1)//Operador de subtração Matriz Matriz
 {
-    Matrix Ret(this->rows, this->cols);
+    Matrix<UsedType> Ret(this->rows, this->cols);
 
-    for(int i = 0; i < this->rows; i++)
-        for (int j = 0; j < this->cols; j++)
+    for(unsigned i = 0; i < this->rows; i++)
+        for (unsigned j = 0; j < this->cols; j++)
             Ret.Mat[i][j] = this->Mat[i][j] - Mat1.Mat[i][j];
 
     return Ret;
 }
 
-Matrix Matrix::operator -(float a)//Operador de subtração Escalar Matriz
+template <class UsedType>
+Matrix<UsedType> Matrix<UsedType>::operator -(UsedType a)//Operador de subtração Escalar Matriz
 {
-    Matrix Ret(this->rows, this->cols);
+    Matrix<UsedType> Ret(this->rows, this->cols);
 
-    for(int i = 0; i < this->rows; i++)
-        for (int j = 0; j < this->cols; j++)
+    for(unsigned i = 0; i < this->rows; i++)
+        for (unsigned j = 0; j < this->cols; j++)
             Ret.Mat[i][j] = this->Mat[i][j] - a;
 
     return Ret;
 }
 
-Matrix operator-(float a, Matrix Mat1)//Operador de subtração Matriz Escalar
+template <class UsedType>
+Matrix<UsedType> operator-(UsedType a, Matrix<UsedType> Mat1)//Operador de subtração Matriz Escalar
 {
     return Mat1-a;
 }
 //-----Fim Operadores de Subtração-----//
 
 //-----Início Operadores de Igualdade-----//
-void Matrix::operator= (Matrix Mat1)//Operador de Igualdade entre Matrizes
+
+template <class UsedType>
+void Matrix<UsedType>::operator= (Matrix<UsedType> Mat1)//Operador de Igualdade entre Matrizes
 {
-    if( this->MatOriginalRows == 0)
-    {
-        this->init(Mat1.rows, Mat1.cols);
+    this->init(Mat1.rows, Mat1.cols);
 
-        for(int i = 0; i < this->rows; i++)
-            for (int j = 0; j < this->cols; j++)
-               this->Mat[i][j] = Mat1.Mat[i][j];
-        if(Mat1.MatOriginalRows != 0)
-        {
-            this->initMatOriginal(Mat1.MatOriginalRows, Mat1.MatOriginalCols);
-            for(int i = 0; i < this->MatOriginalRows; i++)
-                for (int j = 0; j < this->MatOriginalCols; j++)
-                   this->MatOriginal[i][j] = Mat1.MatOriginal[i][j];
-
-            this->initVet1(Mat1.vet1Rows, Mat1.vet1Cols);
-            for(int i = 0; i < this->vet1Rows; i++)
-                for (int j = 0; j < this->vet1Cols; j++)
-                   this->vet1[i][j] = Mat1.vet1[i][j];
-
-            this->initVet2(Mat1.vet2Rows, Mat1.vet2Cols);
-            for(int i = 0; i < this->vet2Rows; i++)
-                for (int j = 0; j < this->vet2Cols; j++)
-                    this->vet2[i][j] = Mat1.vet2[i][j];
-        }
-    }
-    else if((Mat1.vet1Rows == 0 || this->vet1Rows == 0) || (Mat1.vet2Cols == 0 || this->vet2Cols == 0))
-    {
-        try
-        {
-            throw "As dimensoes das matrizes nao batem, atribuição nao e possivel";
-        }
-        catch(const char* msg)
-        {
-            cerr<<endl<<msg<<endl;
-        }
-    }
-    else
-    {
-        if (this->vet1Cols == Mat1.vet1Cols && this->vet2Cols == Mat1.vet2Cols )
-        {
-
-            for(int i = 0; i < this->vet1Cols; i++)
-                for (int j = 0; j < this->vet2Cols; j++)
-                {
-                    int rowTemp = (int) this->vet1[0][i] - 1;
-                    int colTemp = (int) this->vet2[0][j] - 1;
-                    this->MatOriginal[rowTemp][colTemp] = Mat1.Mat[i][j];
-                }
-            Matrix Temp;
-            Temp.init(this->MatOriginalRows, this->MatOriginalCols);
-            for(int i = 0; i < Temp.rows; i++)
-                for (int j = 0; j < Temp.cols; j++)
-                    Temp.Mat[i][j] = this->MatOriginal[i][j];
-
-            this->Address->init(Temp.rows,Temp.cols);
-            for(int i = 0; i < this->Address->rows; i++)
-                for (int j = 0; j < this->Address->cols; j++)
-                    this->Address->Mat[i][j] = Temp.Mat[i][j];
-//            this->Address->print();
-        }
-        else
-        {
-            try
-            {
-                throw "As dimensoes das matrizes nao batem, atribuição nao e possivel";
-            }
-            catch(const char* msg)
-            {
-                cerr<<endl<<msg<<endl;
-            }
-        }
-    }
+    for(unsigned i = 0; i < this->rows; i++)
+        for (unsigned j = 0; j < this->cols; j++)
+            this->Mat[i][j] = Mat1.Mat[i][j];
 }
 
-
-void Matrix::operator=(string value)//Operador para a entrada de uma String
+template <class UsedType>
+void Matrix<UsedType>::operator=(string value)//Operador para a entrada de uma String
 {
     this->init(value);
 }
@@ -465,34 +394,37 @@ void Matrix::operator=(string value)//Operador para a entrada de uma String
 //-----Fim Operadores de Igualdade-----//
 
 //-----Início Operadores de Multplicação-----//
-Matrix Matrix::operator *(Matrix Mat1)//Operador de Multiplicação Matriz Matriz
+template <class UsedType>
+Matrix<UsedType> Matrix<UsedType>::operator *(Matrix<UsedType> Mat1)//Operador de Multiplicação Matriz Matriz
 {
 
-    float temp = 0;
-    Matrix Ret(this->rows, Mat1.cols);
+    UsedType temp = 0;
+    Matrix<UsedType> Ret(this->rows, Mat1.cols);
 
     try
     {
-        if (this->cols != Mat1.rows)
+        if(this->cols == Mat1.rows)
         {
-            throw "As dimensoes das matrizes nao batem, a multiplicacao nao e possivel";
-            Ret.zeros(this->rows, Mat1.cols);
-        }
-        else
-        {
-            for(int i = 0; i < this->rows; i++)
+            for(unsigned i = 0; i < this->rows; i++)
             {
-                for (int col = 0; col < Mat1.cols; col++)
+                for (unsigned col = 0; col < Mat1.cols; col++)
                 {
                     temp = 0;
-                    for (int j = 0; j < this->cols; j++)
+                    for (unsigned j = 0; j < this->cols; j++)
                         temp += this->Mat[i][j]*Mat1.Mat[j][col];
                     Ret.Mat[i][col] = temp;
                 }
 
             }
+
             return Ret;
        }
+
+        else
+        {
+            throw "As dimensoes das matrizes nao batem, a multiplicacao nao e possivel";
+            Ret.zeros(this->rows, Mat1.cols);
+        }
     }
     catch(const char* msg)
     {
@@ -501,30 +433,68 @@ Matrix Matrix::operator *(Matrix Mat1)//Operador de Multiplicação Matriz Matri
     return Ret;
 }
 
-Matrix Matrix::operator *(float a)//Operador de multiplicação Escalar Matriz
+template <class UsedType>
+Matrix<UsedType> Matrix<UsedType>::operator *(UsedType a)//Operador de multiplicação Escalar Matriz
 {
-    Matrix Ret(this->rows, this->cols);
+    Matrix<UsedType> Ret(this->rows, this->cols);
 
-    for(int i = 0; i < this->rows; i++)
-        for (int j = 0; j < this->cols; j++)
+    for(unsigned i = 0; i < this->rows; i++)
+        for (unsigned j = 0; j < this->cols; j++)
             Ret.Mat[i][j] = a*this->Mat[i][j];
 
     return Ret;
 }
 
-Matrix operator*(float a, Matrix Mat1)//Operador de multiplicação Matriz Escalar
+template <class FriendType>
+Matrix<FriendType> operator*(FriendType a, Matrix<FriendType> Mat1)//Operador de multiplicação Matriz Escalar
 {
     return Mat1*a;
 }
 //-----Fim Operadores de Multiplicação-----//
 
-//-----Início Operadores de Concatenação Matrizes-----//
-Matrix Matrix::operator|(Matrix Mat1)//Concatenção de Matrizes a Esquerda
+template <class UsedType>
+Matrix<UsedType> Matrix<UsedType>::operator /(Matrix<UsedType> Mat1)//Operador de Multiplicação Matriz Matriz
 {
-    Matrix temp(this->rows,this->cols+Mat1.cols);
+    if(Mat1.rows == 1 && Mat1.cols == 1)
+        return (*this)/(Mat1(1,1));
+    else if(this->rows == 1 && this->cols == 1)
+        return ((*this)(1,1))*Mat1.inv();
+    else
+        return (*this)*Mat1.inv();
+}
 
-    for(int i = 0; i < temp.rows; i++)
-        for (int j = 0; j < temp.cols; j++)
+template <class UsedType>
+Matrix<UsedType> Matrix<UsedType>::operator/ (UsedType a)//Operador de multiplicação Escalar Matriz
+{
+    Matrix<UsedType> Ret(this->rows, this->cols);
+
+    for(unsigned i = 0; i < this->rows; i++)
+        for (unsigned j = 0; j < this->cols; j++)
+            Ret.Mat[i][j] = this->Mat[i][j]/a;
+
+    return Ret;
+}
+
+template <class FriendType>
+Matrix<FriendType> operator/ (FriendType a, Matrix<FriendType> Mat1)//Operador de multiplicação Matriz Escalar
+{
+    return a*Mat1.inv();
+}
+
+
+//-----Início Operadores de Concatenação Matrizes-----//
+template <class UsedType>
+Matrix<UsedType> Matrix<UsedType>::operator|(Matrix<UsedType> Mat1)//Concatenção de Matrizes a Esquerda
+{
+    Matrix<UsedType> temp;
+
+    if (this->rows > 0)
+        temp.init(this->rows,this->cols+Mat1.cols);
+    else
+        temp.init(1,this->cols+Mat1.cols);
+
+    for(unsigned i = 0; i < temp.rows; i++)
+        for (unsigned j = 0; j < temp.cols; j++)
             if(j<this->cols)
                 temp.add(i+1,j+1,this->Mat[i][j]);
             else
@@ -534,16 +504,22 @@ Matrix Matrix::operator|(Matrix Mat1)//Concatenção de Matrizes a Esquerda
 
 }
 
-Matrix Matrix::operator||(Matrix Mat1)//Concatenação de Matrizes Abaixo
+template <class UsedType>
+Matrix<UsedType> Matrix<UsedType>::operator||(Matrix<UsedType> Mat1)//Concatenação de Matrizes Abaixo
 {
-    Matrix temp(this->rows+Mat1.rows,this->cols);
+    Matrix<UsedType> temp(this->rows+Mat1.rows,this->cols);
 
-    for(int j = 0; j < temp.cols; j++)
-        for (int i = 0; i < temp.rows; i++)
-            if(i<this->rows)
-                temp.add(i+1,j+1,this->Mat[i][j]);
-            else
+    if(this->rows == 0 and this->cols == 0)
+        temp = Mat1;
+    else
+    {
+        for(unsigned j = 0; j < temp.cols; j++)
+            for (unsigned i = 0; i < temp.rows; i++)
+                if(i<this->rows)
+                    temp.add(i+1,j+1,this->Mat[i][j]);
+                else
                 temp.add(i+1,j+1,Mat1.Mat[i-this->rows][j]);
+    }
 
     return temp;
 
@@ -551,21 +527,23 @@ Matrix Matrix::operator||(Matrix Mat1)//Concatenação de Matrizes Abaixo
 //-----Fim Operadores de Concatenação Matrizes-----//
 
 //----Início Operador de Matriz Transposta-----//
-Matrix Matrix::operator~()//Faz a transporta da Matriz
+template <class UsedType>
+Matrix<UsedType> Matrix<UsedType>::operator~()//Faz a transporta da Matriz
 {
-    Matrix temp = *this, Ret (this->rows, this->cols);
-    for(int i = 0; i < this->rows; i++)
-        for (int j = 0; j < this->cols; j++)
-                Ret.Mat[i][j] = temp.Mat[j][i];
+    Matrix<UsedType> Ret (this->cols, this->rows);
+    for(unsigned i = 0; i < this->rows; i++)
+        for (unsigned j = 0; j < this->cols; j++)
+                Ret.Mat[j][i] = this->Mat[i][j];
 
     return Ret;
 }
 //----Fim Operador de Matriz Transposta-----//
 
 //-----Início Operador de Potência de Matrizes-----//
-Matrix Matrix::operator^(float exp)
+template <class UsedType>
+Matrix<UsedType> Matrix<UsedType>::operator^(UsedType exp)
 {
-    Matrix Ret, temp = *this;
+    Matrix<UsedType> Ret, temp = *this;
 
     Ret.eye(this->rows);
 
@@ -578,7 +556,7 @@ Matrix Matrix::operator^(float exp)
 
     Ret.eye(this->rows);
 
-    for(float i = 0; i < exp; i++)
+    for(unsigned i = 0; i < exp; i++)
     {
             Ret = Ret*temp;
     }
@@ -586,12 +564,13 @@ Matrix Matrix::operator^(float exp)
     return Ret;
 }
 
-Matrix Matrix::operator >(float num)//Eleva os elementos da Matriz a um determinado expoente
+template <class UsedType>
+Matrix<UsedType> Matrix<UsedType>::operator >(UsedType num)//Eleva os elementos da Matriz a um determinado expoente
 {
-    Matrix Ret = *this;
+    Matrix<UsedType> Ret = *this;
 
-    for(int i = 0; i < Ret.rows; i++)
-        for(int j = 0; j < Ret.cols; j++)
+    for(unsigned i = 0; i < Ret.rows; i++)
+        for(unsigned j = 0; j < Ret.cols; j++)
             Ret.Mat[i][j] = pow(this->Mat[i][j],num);
 
     return Ret;
@@ -601,17 +580,18 @@ Matrix Matrix::operator >(float num)//Eleva os elementos da Matriz a um determin
 //#####Fim Sobrecarga de Operadores#####//
 
 //#####Início Álgebra Linear#####//
-float Matrix::trace()//Cálcula o Traço da Matriz
+template <class UsedType>
+UsedType Matrix<UsedType>::trace()//Cálcula o Traço da Matriz
 {
-   float traco = 0;
+   UsedType traco = 0;
 
    try
    {
         if(!this->sqr(*this))
             throw "A matrix nao e quadrada";
         else
-            for(int i = 0; i < this->rows; i++ )
-                for(int j = 0; j < this->cols; j++)
+            for(unsigned i = 0; i < this->rows; i++ )
+                for(unsigned j = 0; j < this->cols; j++)
                     if( i == j)
                         traco = traco + this->Mat[i][j];
    }
@@ -623,9 +603,66 @@ float Matrix::trace()//Cálcula o Traço da Matriz
     return traco;
 }
 
-Matrix Matrix::inv()//Encontra a Matriz Inversa.
+template <class UsedType>
+Matrix<UsedType> Matrix<UsedType>::transpose()
 {
-    Matrix Ret =*this, Id;
+  Matrix trans;
+  trans.zeros(this->cols, this->rows);
+
+  for(int i = 0; i < this->rows; i++)
+    for(int j = 0; j < this->cols; j++)
+      trans.Mat[j][i] = this->Mat[i][j];
+
+  return trans;
+}
+
+template <class UsedType>
+Matrix<UsedType> Matrix<UsedType>::cofactor()
+{
+  unsigned i, j, ii, jj, i1, j1;
+//  double det;
+  Matrix<UsedType> Temp, ret;
+  unsigned n = this->rows;
+  Temp.zeros(n-1, n-1);
+  ret.zeros(n, n);
+
+  if(this->rows != this->cols)
+    return ret;
+  if (n < 1) { /* Error */
+
+  }
+
+  for(j=0; j<n; j++)
+    for(i=0; i<n; i++) {
+
+      /* Form the adjoint a_ij */
+      i1 = 0;
+      for(ii=0; ii<n; ii++) {
+        if(ii == i)
+          continue;
+
+        j1 = 0;
+        for(jj=0; jj<n; jj++) {
+          if(jj == j)
+            continue;
+
+          Temp.Mat[i1][j1] = this->Mat[ii][jj];
+          j1++;
+        }
+        i1++;
+      }
+
+      /* Fill in the elements of the cofactor */
+      ret.Mat[i][j] = pow(-1.0, i+j+2.0) * Temp.det();
+    }
+
+  return ret;
+}
+
+template <class UsedType>
+Matrix<UsedType> Matrix<UsedType>::NumericInv()
+{
+    Matrix<UsedType> Ret =*this, Id;
 
 
     try
@@ -636,10 +673,10 @@ Matrix Matrix::inv()//Encontra a Matriz Inversa.
         {
             Id.eye(this->rows);
 
-            for(int i = 0; i < this->rows; i++ )
-                for(int j = i+1; j<this->rows; j++)
+            for(unsigned i = 0; i < this->rows; i++ )
+                for(unsigned j = i+1; j<this->rows; j++)
                 {
-                    float m = Ret.Mat[j][i]/Ret.Mat[i][i];
+                    UsedType m = Ret.Mat[j][i]/Ret.Mat[i][i];
                     for(int k = 0; k <this->cols; k++)
                     {
                         Ret.Mat[j][k] = Ret.Mat[j][k]-m*Ret.Mat[i][k];
@@ -648,21 +685,21 @@ Matrix Matrix::inv()//Encontra a Matriz Inversa.
                 }
 
 
-            for(int i = this->rows-1; i >=0 ; i-- )
-                for(int j = i-1; j>=0; j--)
+            for(unsigned i = this->rows-1; i >=0 ; i-- )
+                for(unsigned j = i-1; j>=0; j--)
                 {
-                    float m = Ret.Mat[j][i]/Ret.Mat[i][i];
-                    for(int k = 0; k <this->cols; k++)
+                    UsedType m = Ret.Mat[j][i]/Ret.Mat[i][i];
+                    for(unsigned k = 0; k <this->cols; k++)
                     {
                         Ret.Mat[j][k] = Ret.Mat[j][k]-m*Ret.Mat[i][k];
                         Id.Mat[j][k] = Id.Mat[j][k]-m*Id.Mat[i][k];
                     }
                 }
 
-            for(int i=0; i< this->rows; i++)
+            for(unsigned i=0; i< this->rows; i++)
             {
-                float m = 1/Ret.Mat[i][i];
-                for(int j=0; j<this->rows; j++)
+                UsedType m = 1/Ret.Mat[i][i];
+                for(unsigned j=0; j<this->rows; j++)
                 {
                      Ret.Mat[i][j] = m*Ret.Mat[i][j];
                      Id.Mat[i][j] = m*Id.Mat[i][j];
@@ -681,9 +718,20 @@ Matrix Matrix::inv()//Encontra a Matriz Inversa.
     return Id;
 }
 
-Matrix Matrix::pol()//Encontra os Índices do Polinômio Característico
+template <class UsedType>
+Matrix<UsedType> Matrix<UsedType>::inv()//Encontra a Matriz Inversa.
 {
-    Matrix A = *this, B, I, C, ind(1, this->cols + 1);
+    Matrix<UsedType> ret;
+    ret = this->cofactor();
+    ret = ret.transpose() / this->det();
+
+    return ret;
+}
+
+template <class UsedType>
+Matrix<UsedType> Matrix<UsedType>::pol()//Encontra os Índices do Polinômio Característico
+{
+    Matrix<UsedType> A = *this, B, I, C, ind(1, this->cols + 1);
     int sinal;
 
     try
@@ -695,7 +743,7 @@ Matrix Matrix::pol()//Encontra os Índices do Polinômio Característico
              C = A;
              sinal = pow(-1, this->rows);
              ind.Mat[0][0] = 1;
-             for(int i = 1; i <= this->rows; i++ )
+             for(unsigned i = 1; i <= this->rows; i++ )
              {
                     ind.Mat[0][i] = (C.trace()/i);
                     B = C - ind.Mat[0][i]*I;
@@ -703,21 +751,22 @@ Matrix Matrix::pol()//Encontra os Índices do Polinômio Característico
                     ind.Mat[0][i] = -ind.Mat[0][i];
 
              }
-             for (int i = 0; i < (ind.cols); i++)
+             for (unsigned i = 0; i < (ind.cols); i++)
                  ind.Mat[0][i] = ind.Mat[0][i]*sinal;
 
     }
     catch (const char* msg)
     {
          cerr<<msg<<endl;
-    }    
+    }
 
     return ind;
 }
 
-Matrix Matrix::eigenvalues()//Encontra os Auto Valores da Matriz.
+template <class UsedType>
+Matrix<UsedType> Matrix<UsedType>::eigenvalues()//Encontra os Auto Valores da Matriz.
 {
-    Matrix autovlr(1, this->rows);
+    Matrix<UsedType> autovlr(this->rows, 2);
 
     try
     {
@@ -725,46 +774,77 @@ Matrix Matrix::eigenvalues()//Encontra os Auto Valores da Matriz.
            throw "A matrix não é quadrada";
        else
            if (!this->ind(*this))
-       {
-                   Matrix Q, temp, R, A = *this;
-                   float max = 1000;
+           {
+               Matrix<UsedType> A;
+               unsigned k = 0;
 
-                   Q.eye(this->rows);
-                   R.eye(this->rows);
-                   while (max > 0.00001)
+               A = *this;
+
+               for(unsigned i = 0; i < 100; i++)
+               {
+                   if((A.rows == 0) && (A.cols == 0))
                    {
-                       for(int i = 0; i < this->rows; i++ )
-                           for(int j = i+1; j<this->rows; j++)
-                               {
-                                        temp.eye(this->rows);
-                                        if (A.Mat[i][j] != 0)
-                                        {
-                                            temp.Mat[i][i] = (A.Mat[i][i])/sqrt(pow(A.Mat[i][i],2) + pow(A.Mat[i][j],2));
-                                            temp.Mat[j][j] = temp.Mat[i][i];
-                                            temp.Mat[i][j] = (A.Mat[i][j])/sqrt(pow(A.Mat[i][i],2) + pow(A.Mat[i][j],2));
-                                            temp.Mat[j][i] = - temp.Mat[i][j];
-                                        }
-                                       R = temp*A;
-                                       A = R*(~temp);
-                           }
-                       for(int i = 0; i < this->rows; i++ )
-                           for(int j = i+1; j< this->rows; j++)
-                           {
-                               if ((A.Mat[i][j] > 0) && (A.Mat[i][j]) < max)
-                                   max = A.Mat[i][j];
-                               else if((A.Mat[i][j] < 0) && (-1*A.Mat[i][j]) < max)
-                                   max = -1*(A.Mat[i][j]);
-                           }
-                    }
-                   for(int i = 0; i < this->rows; i++ )
-                       for(int j = 0; j< this->rows; j++)
-                           if (i == j)
-                                autovlr.Mat[0][i] = A.Mat[i][j];
-       }
-            else
-               for(int i = 0; i < this->rows; i++ )
-                   autovlr.Mat[0][i] = 1;
+                       break;
+                   }
+                   else
+                   {
+                       Matrix<UsedType> Ai, I, Q, R;
+                       UsedType sum = 0;
 
+                       I.eye(A.rows);
+
+                       (A - A.Mat[A.rows - 1][A.cols -1]*I).QR(Q, R);
+
+                       Ai = R*Q + A.Mat[A.rows - 1][A.cols -1]*I;
+
+                       for(unsigned j = 0; j < Ai.cols - 1; j++)
+                       {
+                            sum += abs(Ai.Mat[Ai.rows - 1][j]);
+                       }
+
+                       if(sum < 1e-30)
+                       {
+                           Matrix<UsedType> temp;
+
+                           autovlr.Mat[k][0] = Ai.Mat[Ai.rows - 1][Ai.cols - 1];
+
+                           temp = Ai;
+                           A.zeros(A.rows - 1, A.cols -1);
+
+                           for(unsigned m = 0; m < A.rows; m++)
+                            for(unsigned n = 0; n < A.cols; n++)
+                           {
+                               A.Mat[m][n] = temp.Mat[m][n];
+                           }
+
+                           k++;
+
+                           A.print();
+                       }
+                       else
+                       {
+                           A = Ai;
+                       }
+                   }
+               }
+
+               if((A.rows != 0) && (A.cols != 0))
+               {
+                   for(unsigned i = 0; i < autovlr.rows; i++)
+                   {
+                       if((autovlr.Mat[i][0] == 0) && (autovlr.Mat[i+1][0] == 0))
+                       {
+                           autovlr.Mat[i][0] = A.trace()/2;
+                           autovlr.Mat[i][1] = -sqrt(abs(A.Mat[0][1] * A.Mat[1][0]));
+                           autovlr.Mat[i + 1][0] = A.trace()/2;
+                           autovlr.Mat[i + 1][1] = sqrt(abs(A.Mat[0][1] * A.Mat[1][0]));
+                       }
+                   }
+               }
+            }
+            else
+               for(unsigned i = 0; i < this->rows; i++ )
+                   autovlr.Mat[i][0] = 1;
       }
 
     catch (const char* msg)
@@ -775,10 +855,11 @@ Matrix Matrix::eigenvalues()//Encontra os Auto Valores da Matriz.
     return autovlr;
 }
 
-float Matrix::det()//Encontra o determinante da Matriz.
+template <class UsedType>
+UsedType Matrix<UsedType>::NumericDet()
 {
-    float x = 1;
-    Matrix A;
+    UsedType x = 1;
+    Matrix<UsedType> A;
 
     try
     {
@@ -788,7 +869,7 @@ float Matrix::det()//Encontra o determinante da Matriz.
              {
                 A = this->eigenvalues();
 
-                for (int i = 0; i < A.cols; i++)
+                for (unsigned i = 0; i < A.cols; i++)
                     x *= A.Mat[0][i];
              }
              else
@@ -802,395 +883,628 @@ float Matrix::det()//Encontra o determinante da Matriz.
     return x;
 }
 
-Matrix diff(Matrix M, float h)//Encontra a derivada de uma Matriz
+template <class UsedType>
+UsedType Matrix<UsedType>::det()//Encontra o determinante da Matriz.
 {
-    Matrix Ret;
-    for(int i = 0; i < M.rows-1; i++)
-        for(int j = 0; j < M.cols; j++)
+    unsigned i, j, j1, j2;
+    double det = 0;
+    Matrix Temp;
+    unsigned n = this->rows;
+
+    if(this->rows != this->cols)
+        return 0.0;
+
+    if (n < 1)
+    { /* Error */
+
+    }
+    else if (n == 1)
+    { /* Shouldn't get used */
+        det = this->Mat[0][0];
+    }
+    else if (n == 2)
+    {
+        det = this->Mat[0][0] * this->Mat[1][1] - this->Mat[1][0] * this->Mat[0][1];
+    }
+    else
+    {
+        for(j1=0; j1<n; j1++)
+        {
+            Temp.zeros(n-1,n-1);
+            for(i=1; i<n; i++)
+            {
+                j2 = 0;
+                for(j=0; j<n; j++)
+                {
+                    if(j == j1)
+                        continue;
+
+                    Temp.Mat[i-1][j2] = this->Mat[i][j];
+                    j2++;
+                }
+            }
+            det += pow(-1.0, j1+2.0) * this->Mat[0][j1] * Temp.det();
+
+        }
+    }
+    return(det);
+}
+
+template <class FriendType>
+Matrix<FriendType> diff(Matrix<FriendType> M, FriendType h)//Encontra a derivada de uma Matriz
+{
+    Matrix<FriendType> Ret;
+    for(unsigned i = 0; i < M.rows-1; i++)
+        for(unsigned j = 0; j < M.cols; j++)
             Ret.add(i+1,j+1,(M.Mat[i+1][j] - M.Mat[i][j])/h);
 
     return Ret;
 }
+
 //#####Fim Álgebra Linear#####//
 
 //#####Início Funções de Retorno de Informações da Matriz#####//
-int Matrix::getRows()//Retorna o numéro de linhas de uma Matriz.
+template <class UsedType>
+unsigned Matrix<UsedType>::getRows()//Retorna o numéro de linhas de uma Matriz.
 {
-	return this->rows;
+    return this->rows;
 }
 
-int Matrix::getCols()//Retorna o numéro de colunas de uma Matriz.
+template <class UsedType>
+unsigned Matrix<UsedType>::getCols()//Retorna o numéro de colunas de uma Matriz.
 {
-	return this->cols;
+    return this->cols;
 }
 
-float Matrix::getMat(int row, int col)//Retorna o valor do elemento no índice ij.
+template <class UsedType>
+void Matrix<UsedType>::setLine(unsigned num, Matrix<UsedType> Line)
 {
-    return this->Mat[row-1][col-1];
+    try
+    {
+        if(!(this->getCols() == Line.getCols()))
+            throw "Numero de colunas incompativel";
+        else
+        {
+            for(unsigned i = 1; i <= Line.getCols(); i++)
+                this->add(num,i,Line.Mat[0][i-1]);
+        }
+    }
+    catch(const char* msg)
+    {
+        cerr<<msg<<endl;
+    }
 }
+
+template <class UsedType>
+void Matrix<UsedType>::setColumn(unsigned num, Matrix<UsedType> Column)
+{
+    try
+    {
+        if(!(this->getRows() == Column.getRows()))
+            throw "Numero de linhas incompativel";
+        else
+        {
+            for(unsigned i = 0; i < Column.getRows(); i++)
+                this->Mat[i][num-1] = Column.Mat[i][num-1];
+        }
+    }
+    catch(const char* msg)
+    {
+        cerr<<msg<<endl;
+    }
+}
+
+template <class UsedType>
+Matrix<UsedType> Matrix<UsedType>::getLine(unsigned num)
+{
+    Matrix<UsedType> ret(1,this->cols);
+
+    for (unsigned i = 0; i < this->cols; i++)
+        ret.Mat[0][i] = this->Mat[num-1][i];
+
+    return ret;
+}
+
+template <class UsedType>
+Matrix<UsedType> Matrix<UsedType>::getColumn(unsigned num)
+{
+    Matrix<UsedType> ret(this->rows, 1);
+
+    for (unsigned i = 0; i < this->rows; i++)
+        ret.Mat[i][0] = this->Mat[i][num-1];
+
+    return ret;
+}
+
+//UsedType Matrix::getMat(unsigned row, unsigned col)//Retorna o valor do elemento no índice ij.
+//{
+//    return this->Mat[row-1][col-1];
+//}
 //#####Fim Funções de Retorno de Informações da Matriz#####//
 //-----Funções Auxiliares para biblioteca de matrizes------//
 
-float max(Matrix M)
+template <class UsedType>
+UsedType Matrix<UsedType>::max()
 {
-     float  maximum = M.Mat[0][0];
-
-     for(int i = 0; i < M.rows; i++)
-       for(int j = 0; j < M.cols; j++)
-         if(maximum < M.Mat[i][j])
-           maximum = M.Mat[i][j];
+    UsedType  maximum = this->Mat[0][0];
+     if(this->rows != 0 && this->cols != 0)
+         for(unsigned i = 0; i < this->rows; i++)
+            for(unsigned j = 0; j < this->cols; j++)
+                if(maximum < this->Mat[i][j])
+                    maximum = this->Mat[i][j];
 
      return maximum;
 }
-
-float Matrix::operator()(int row,int col)
+template <class UsedType>
+UsedType Matrix<UsedType>::min()
 {
-    return this->getMat( row, col);
+    UsedType  minimun;
+    minimun = this->Mat[0][0];
+    if(this->rows != 0 && this->cols != 0)
+        for(unsigned i = 0; i < this->rows; i++)
+            for(unsigned j = 0; j < this->cols; j++)
+                if(minimun > this->Mat[i][j])
+                    minimun = this->Mat[i][j];
+
+    return minimun;
 }
 
-void Matrix::operator ()(int row, int col, float value)
+template <class UsedType>
+Matrix<UsedType> Matrix<UsedType>::normalize(UsedType yUp, UsedType yDown)
+{
+  Matrix<UsedType>  ret;
+  ret.init(this->getRows(),this->getCols());
+  UsedType xDown = this->min(), xUp = this->max();
+
+  for(unsigned i = 0; i < this->rows; i++)
+    for(unsigned j = 0; j < this->cols; j++)
+        ret(i+1,j+1,((this->Mat[i][j] - xDown)/(xUp - xDown))*(yUp - yDown) + yDown);
+
+  return ret;
+}
+
+template <class UsedType>
+UsedType Matrix<UsedType>::operator()(unsigned row, unsigned col)
+{
+    return this->Mat[row-1][col-1];
+}
+
+template <class UsedType>
+void Matrix<UsedType>::operator ()(unsigned row, unsigned col, UsedType value)
 {
     this->add(row, col, value);
 }
 
-
-float min(Matrix M)
+template <class UsedType>
+void Matrix<UsedType>::lineVector(unsigned left, unsigned rigth)
 {
-  float  minimun;
-  minimun = M.Mat[0][0];
-
-  for(int i = 0; i < M.rows; i++)
-    for(int j = 0; j < M.cols; j++)
-      if(minimun > M.Mat[i][j])
-        minimun = M.Mat[i][j];
-
-  return minimun;
-}
-
-Matrix Matrix::operator() (Matrix M1,Matrix M2)
-{
-    float maxM1 = max(M1), maxM2 = max(M2), minM1 = min(M1), minM2 = min(M2);
-    Matrix Ret;
-    try
-    {
-        if (minM1 < 1 || minM2 < 1 || maxM1 > this->rows || maxM2 > this->cols)
-            throw "A matrix não é quadrada";
-        else
-        {
-            for(int i = 1; i <= M1.getCols(); i++)
-                for(int j = 1; j <= M2.getCols(); j++)
-                    Ret.add(i, j, this->Mat[(int)M1(1,i) - 1][(int)M2(1,j) - 1]);
-            Ret.initMatOriginal(this->rows, this->cols);
-            Ret.initVet1(M1.rows, M1.cols);
-            Ret.initVet2(M2.rows, M2.cols);
-//            this->print();
-            for(int i = 0; i < Ret.MatOriginalRows; i++)
-                for(int j = 0; j < Ret.MatOriginalCols; j++)
-                    Ret.MatOriginal[i][j] = this->Mat[i][j];
-
-//            Ret.printMatOr();
-
-            for(int i = 0; i < Ret.vet1Rows; i++)
-                for(int j = 0; j < Ret.vet1Cols; j++)
-                    Ret.vet1[i][j] = M1.Mat[i][j];
-
-            for(int i = 0; i < Ret.vet2Rows; i++)
-                for(int j = 0; j < Ret.vet2Cols; j++)
-                    Ret.vet2[i][j] = M2.Mat[i][j];
-        }
-    }
-    catch (const char* msg)
-    {
-        cerr<<msg<<endl;
-    }
-    Ret.Address = this;
-    return Ret;
-}
-
-Matrix Matrix::operator() (string S1,string S2)
-{
-    Matrix M1, M2, Ret;
-
-    M1 = S1;
-    M2 = S2;
-    Ret = this->operator ()(M1,M2);
-//    Ret.print();
-    Ret.Address = this;
-//    this->print();
-//    Ret.printMatOr();
-    return Ret;
-}
-
-void Matrix::lineVector(int left, int rigth)
-{
-    int j = 1;
+    unsigned j = 1;
     if (left > rigth)
-        for(int i = left; i >= rigth; i--)
+        for(unsigned i = left; i >= rigth; i--)
         {
             this->add(1,j, i);
             j++;
         }
     else
-        for(int i = left; i <= rigth; i++)
+        for(unsigned i = left; i <= rigth; i++)
         {
             this->add(1,j, i);
             j++;
         }
 }
 
-
-
-Matrix abs(Matrix M)
+template <class UsedType>
+Matrix<UsedType> abs(Matrix<UsedType> M)
 {
-    Matrix ret = M;
-    for(  int i = 0; i < M.rows; i++)
-        for(  int j = 0; j < M.cols; j++)
+    Matrix<UsedType> ret = M;
+    for(  unsigned i = 0; i < M.rows; i++)
+        for(  unsigned j = 0; j < M.cols; j++)
             if (ret.Mat[i][j] < 0)
                 ret.Mat[i][j] = -ret.Mat[i][j];
 
     return ret;
 }
 
-int Matrix::length()
-{
-    int tam;
-
-    if(this->rows > this->cols)
-        tam = this->rows;
-    else
-        tam = this->cols;
-
-    return tam;
-}
-
 //-----------------------------------------------------//
-void Matrix::randU(int row, int col)
+
+template <class UsedType>
+Matrix<UsedType> cos(Matrix<UsedType> M1)
 {
-    float t;
-    srand (time(NULL));
-    this->init(row, col);
-    for(int i = 0; i < this->rows; i++)
-        for(int j = 0; j < this->cols; j++)
+    Matrix<UsedType> ret = M1;
+    for(  unsigned i = 0; i < M1.getRows(); i++)
+        for(  unsigned j = 0; j < M1.getCols(); j++)
+            ret.add(i+1, j+1, cos(M1(i+1,j+1)));
+
+    return ret;
+
+}
+
+template <class UsedType>
+Matrix<UsedType> sin(Matrix<UsedType> M1)
+{
+    Matrix<UsedType> ret = M1;
+    for(  unsigned i = 0; i < M1.getRows(); i++)
+        for(  unsigned j = 0; j < M1.getCols(); j++)
+            ret.add(i+1, j+1, sin(M1(i+1,j+1)));
+
+    return ret;
+}
+
+template <class UsedType>
+Matrix<UsedType> tan(Matrix<UsedType> M1)
+{
+    Matrix<UsedType> ret = M1;
+    for(  unsigned i = 0; i < M1.getRows(); i++)
+        for(  unsigned j = 0; j < M1.getCols(); j++)
+            ret.add(i+1, j+1, tan(M1(i+1,j+1)));
+
+    return ret;
+
+}
+
+template <class UsedType>
+Matrix<UsedType> acos(Matrix<UsedType> M1)
+{
+    Matrix<UsedType> ret = M1;
+    for(  unsigned i = 0; i < M1.getRows(); i++)
+        for(  unsigned j = 0; j < M1.getCols(); j++)
+            ret.add(i+1, j+1, acos(M1(i+1,j+1)));
+
+    return ret;
+
+
+}
+
+template <class UsedType>
+Matrix<UsedType> asin(Matrix<UsedType> M1)
+{
+    Matrix<UsedType> ret = M1;
+    for(  unsigned i = 0; i < M1.getRows(); i++)
+        for(  unsigned j = 0; j < M1.getCols(); j++)
+            ret.add(i+1, j+1, asin(M1(i+1,j+1)));
+
+    return ret;
+
+
+}
+
+template <class UsedType>
+Matrix<UsedType> atan(Matrix<UsedType> M1)
+{
+    Matrix<UsedType> ret = M1;
+    for(  unsigned i = 0; i < M1.getRows(); i++)
+        for(  unsigned j = 0; j < M1.getCols(); j++)
+            ret.add(i+1, j+1, atan(M1(i+1,j+1)));
+
+    return ret;
+
+}
+
+template <class UsedType>
+Matrix<UsedType> cosh(Matrix<UsedType> M1)
+{
+    Matrix<UsedType> ret = M1;
+    for(  unsigned i = 0; i < M1.getRows(); i++)
+        for(  unsigned j = 0; j < M1.getCols(); j++)
+            ret.add(i+1, j+1, cosh(M1(i+1,j+1)));
+
+    return ret;
+
+}
+
+template <class UsedType>
+Matrix<UsedType> sinh(Matrix<UsedType> M1)
+{
+    Matrix<UsedType> ret = M1;
+    for(  unsigned i = 0; i < M1.getRows(); i++)
+        for(  unsigned j = 0; j < M1.getCols(); j++)
+            ret.add(i+1, j+1, sinh(M1(i+1,j+1)));
+
+    return ret;
+
+
+}
+
+template <class UsedType>
+Matrix<UsedType> tanh(Matrix<UsedType> M1)
+{
+    Matrix<UsedType> ret = M1;
+    for(  unsigned i = 0; i < M1.getRows(); i++)
+        for(  unsigned j = 0; j < M1.getCols(); j++)
+            ret.add(i+1, j+1, tanh(M1(i+1,j+1)));
+
+    return ret;
+
+
+}
+
+template <class UsedType>
+Matrix<UsedType> acosh(Matrix<UsedType> M1)
+{
+    Matrix<UsedType> ret = M1;
+    for(  unsigned i = 0; i < M1.getRows(); i++)
+        for(  unsigned j = 0; j < M1.getCols(); j++)
+            ret.add(i+1, j+1, acosh(M1(i+1,j+1)));
+
+    return ret;
+
+
+}
+
+template <class UsedType>
+Matrix<UsedType> asinh(Matrix<UsedType> M1)
+{
+    Matrix<UsedType> ret = M1;
+    for(  unsigned i = 0; i < M1.getRows(); i++)
+        for(  unsigned j = 0; j < M1.getCols(); j++)
+            ret.add(i+1, j+1, asinh(M1(i+1,j+1)));
+
+    return ret;
+
+
+}
+
+template <class UsedType>
+Matrix<UsedType> atanh(Matrix<UsedType> M1)
+{
+    Matrix<UsedType> ret = M1;
+    for(  unsigned i = 0; i < M1.getRows(); i++)
+        for(  unsigned j = 0; j < M1.getCols(); j++)
+            ret.add(i+1, j+1, atanh(M1(i+1,j+1)));
+
+    return ret;
+
+}
+
+template <class UsedType>
+Matrix<UsedType> exp(Matrix<UsedType> M1)
+{
+    Matrix<UsedType> ret = M1;
+    for(  unsigned i = 0; i < M1.getRows(); i++)
+        for(  unsigned j = 0; j < M1.getCols(); j++)
+            ret.add(i+1, j+1, exp(M1(i+1,j+1)));
+
+    return ret;
+
+
+}
+
+template <class UsedType>
+Matrix<UsedType> log(Matrix<UsedType> M1)
+{
+    Matrix<UsedType> ret = M1;
+    for(  unsigned i = 0; i < M1.getRows(); i++)
+        for(  unsigned j = 0; j < M1.getCols(); j++)
+            ret.add(i+1, j+1, log(M1(i+1,j+1)));
+
+    return ret;
+
+
+}
+
+template <class UsedType>
+Matrix<UsedType> log10(Matrix<UsedType> M1)
+{
+    Matrix<UsedType> ret = M1;
+    for(  unsigned i = 0; i < M1.getRows(); i++)
+        for(  unsigned j = 0; j < M1.getCols(); j++)
+            ret.add(i+1, j+1, log10(M1(i+1,j+1)));
+
+    return ret;
+
+
+}
+
+template <class UsedType>
+Matrix<UsedType> ceil(Matrix<UsedType> M1)
+{
+    Matrix<UsedType> ret = M1;
+    for(  unsigned i = 0; i < M1.getRows(); i++)
+        for(  unsigned j = 0; j < M1.getCols(); j++)
+            ret.add(i+1, j+1, ceil(M1(i+1,j+1)));
+
+    return ret;
+
+
+}
+
+template <class UsedType>
+Matrix<UsedType> floor(Matrix<UsedType> M1)
+{
+    Matrix<UsedType> ret = M1;
+    for(  unsigned i = 0; i < M1.getRows(); i++)
+        for(  unsigned j = 0; j < M1.getCols(); j++)
+            ret.add(i+1, j+1, floor(M1(i+1,j+1)));
+
+    return ret;
+}
+
+template <class UsedType>
+Matrix<UsedType> round(Matrix<UsedType> M1)
+{
+    Matrix<UsedType> ret = M1;
+    for(  unsigned i = 0; i < M1.getRows(); i++)
+        for(  unsigned j = 0; j < M1.getCols(); j++)
+            ret.add(i+1, j+1, round(M1(i+1,j+1)));
+
+    return ret;
+}
+
+template <class UsedType>
+UsedType norm(Matrix<UsedType> M1)
+{
+    UsedType sum = 0;
+    for(  unsigned i = 0; i < M1.getRows(); i++)
+        for(  unsigned j = 0; j < M1.getCols(); j++)
+            sum += pow(M1(i+1,j+1), 2);
+
+    return sqrt(sum);
+}
+
+template <class UsedType>
+void Matrix<UsedType>::QR(Matrix<UsedType>& Q, Matrix<UsedType>& R)
+{
+    UsedType tal, sigma, gama;
+
+    Q.eye(this->rows);
+    R = *this;
+
+    for(unsigned j = 0; j < R.cols; j++)
+        for(unsigned i = (R.rows - 1); i >= (j + 1); i--)
         {
-            t = rand();
-            this->Mat[i][j] = (float)(t)/RAND_MAX;
+            Matrix<UsedType> temp;
+
+            temp.eye(this->rows);
+
+            if(abs(R.Mat[i-1][j]) > abs(R.Mat[i][j]))
+            {
+                tal = R.Mat[i][j]/R.Mat[i-1][j];
+                gama = 1/(sqrt(1 + pow(tal, 2)));
+                sigma = tal*gama;
+            }
+            else
+            {
+                tal = R.Mat[i-1][j]/R.Mat[i][j];
+                sigma = 1/(sqrt(1 + pow(tal, 2)));
+                gama = sigma*tal;
+            }
+
+            temp.Mat[i][i] = gama;
+            temp.Mat[i][i - 1] = sigma;
+            temp.Mat[i - 1][i] = -sigma;
+            temp.Mat[i - 1][i - 1] = gama;
+
+            R = ~temp*R;
+            Q = Q*(temp);
         }
-}
-
-Matrix cos(Matrix M1)
-{
-    Matrix ret = M1;
-    for(  int i = 0; i < M1.getRows(); i++)
-        for(  int j = 0; j < M1.getCols(); j++)
-            ret.add(i+1, j+1, cos(M1.getMat(i+1,j+1)));
-
-    return ret;
-
-}
-
-Matrix sin(Matrix M1)
-{
-    Matrix ret = M1;
-    for(  int i = 0; i < M1.getRows(); i++)
-        for(  int j = 0; j < M1.getCols(); j++)
-            ret.add(i+1, j+1, sin(M1.getMat(i+1,j+1)));
-
-    return ret;
-}
-
-Matrix tan(Matrix M1)
-{
-    Matrix ret = M1;
-    for(  int i = 0; i < M1.getRows(); i++)
-        for(  int j = 0; j < M1.getCols(); j++)
-            ret.add(i+1, j+1, tan(M1.getMat(i+1,j+1)));
-
-    return ret;
-
-}
-
-Matrix acos(Matrix M1)
-{
-    Matrix ret = M1;
-    for(  int i = 0; i < M1.getRows(); i++)
-        for(  int j = 0; j < M1.getCols(); j++)
-            ret.add(i+1, j+1, acos(M1.getMat(i+1,j+1)));
-
-    return ret;
-
-
-}
-
-Matrix asin(Matrix M1)
-{
-    Matrix ret = M1;
-    for(  int i = 0; i < M1.getRows(); i++)
-        for(  int j = 0; j < M1.getCols(); j++)
-            ret.add(i+1, j+1, asin(M1.getMat(i+1,j+1)));
-
-    return ret;
-
-
-}
-
-Matrix atan(Matrix M1)
-{
-    Matrix ret = M1;
-    for(  int i = 0; i < M1.getRows(); i++)
-        for(  int j = 0; j < M1.getCols(); j++)
-            ret.add(i+1, j+1, atan(M1.getMat(i+1,j+1)));
-
-    return ret;
-
-}
-
-Matrix cosh(Matrix M1)
-{
-    Matrix ret = M1;
-    for(  int i = 0; i < M1.getRows(); i++)
-        for(  int j = 0; j < M1.getCols(); j++)
-            ret.add(i+1, j+1, cosh(M1.getMat(i+1,j+1)));
-
-    return ret;
-
-}
-
-Matrix sinh(Matrix M1)
-{
-    Matrix ret = M1;
-    for(  int i = 0; i < M1.getRows(); i++)
-        for(  int j = 0; j < M1.getCols(); j++)
-            ret.add(i+1, j+1, sinh(M1.getMat(i+1,j+1)));
-
-    return ret;
-
-
-}
-
-Matrix tanh(Matrix M1)
-{
-    Matrix ret = M1;
-    for(  int i = 0; i < M1.getRows(); i++)
-        for(  int j = 0; j < M1.getCols(); j++)
-            ret.add(i+1, j+1, tanh(M1.getMat(i+1,j+1)));
-
-    return ret;
-
-
-}
-
-Matrix acosh(Matrix M1)
-{
-    Matrix ret = M1;
-    for(  int i = 0; i < M1.getRows(); i++)
-        for(  int j = 0; j < M1.getCols(); j++)
-            ret.add(i+1, j+1, acosh(M1.getMat(i+1,j+1)));
-
-    return ret;
-
-
-}
-
-Matrix asinh(Matrix M1)
-{
-    Matrix ret = M1;
-    for(  int i = 0; i < M1.getRows(); i++)
-        for(  int j = 0; j < M1.getCols(); j++)
-            ret.add(i+1, j+1, asinh(M1.getMat(i+1,j+1)));
-
-    return ret;
-
-
-}
-
-Matrix atanh(Matrix M1)
-{
-    Matrix ret = M1;
-    for(  int i = 0; i < M1.getRows(); i++)
-        for(  int j = 0; j < M1.getCols(); j++)
-            ret.add(i+1, j+1, atanh(M1.getMat(i+1,j+1)));
-
-    return ret;
-
-}
-
-Matrix exp(Matrix M1)
-{
-    Matrix ret = M1;
-    for(  int i = 0; i < M1.getRows(); i++)
-        for(  int j = 0; j < M1.getCols(); j++)
-            ret.add(i+1, j+1, exp(M1.getMat(i+1,j+1)));
-
-    return ret;
-
-
-}
-
-Matrix log(Matrix M1)
-{
-    Matrix ret = M1;
-    for(  int i = 0; i < M1.getRows(); i++)
-        for(  int j = 0; j < M1.getCols(); j++)
-            ret.add(i+1, j+1, log(M1.getMat(i+1,j+1)));
-
-    return ret;
-
-
-}
-
-Matrix log10(Matrix M1)
-{
-    Matrix ret = M1;
-    for(  int i = 0; i < M1.getRows(); i++)
-        for(  int j = 0; j < M1.getCols(); j++)
-            ret.add(i+1, j+1, log10(M1.getMat(i+1,j+1)));
-
-    return ret;
-
-
-}
-
-Matrix ceil(Matrix M1)
-{
-    Matrix ret = M1;
-    for(  int i = 0; i < M1.getRows(); i++)
-        for(  int j = 0; j < M1.getCols(); j++)
-            ret.add(i+1, j+1, ceil(M1.getMat(i+1,j+1)));
-
-    return ret;
-
-
-}
-
-Matrix floor(Matrix M1)
-{
-    Matrix ret = M1;
-    for(  int i = 0; i < M1.getRows(); i++)
-        for(  int j = 0; j < M1.getCols(); j++)
-            ret.add(i+1, j+1, floor(M1.getMat(i+1,j+1)));
-
-    return ret;
-}
-
-Matrix round(Matrix M1)
-{
-    Matrix ret = M1;
-    for(  int i = 0; i < M1.getRows(); i++)
-        for(  int j = 0; j < M1.getCols(); j++)
-            ret.add(i+1, j+1, round(M1.getMat(i+1,j+1)));
-
-    return ret;
 }
 
 //double operator ^(double num1, double num2)
 //{
 //    return pow(num1,num2);
 //}
+//template Matrix<double>::Matrix<double>();
+//--------------------------------------------------------------------------------//
+//-----------------------------Int Template---------------------------------------//
+template class Matrix<int>;
+//template Matrix<int> operator+<int> (int, Matrix<int>);
+//template Matrix<int> operator-<int> (int, Matrix<int>);
+template Matrix<int> operator*<int> (int, Matrix<int>);
+template Matrix<int> operator/<int> (int, Matrix<int>);
+template Matrix<int> diff<int> (Matrix<int>, int);
+//template int max<int> (Matrix<int>);
+//template int min<int> (Matrix<int>);
+//template int norm<int> (Matrix<int>);
+//template Matrix<int> abs<int> (Matrix<int>);
+//template Matrix<int> cos<int> (Matrix<int>);
+//template Matrix<int> sin<int> (Matrix<int>);
+//template Matrix<int> tan<int> (Matrix<int>);
+//template Matrix<int> acos<int> (Matrix<int>);
+//template Matrix<int> asin<int> (Matrix<int>);
+//template Matrix<int> atan<int> (Matrix<int>);
+//template Matrix<int> cosh<int> (Matrix<int>);
+//template Matrix<int> sinh<int> (Matrix<int>);
+//template Matrix<int> tanh<int> (Matrix<int>);
+//template Matrix<int> acosh<int> (Matrix<int>);
+//template Matrix<int> asinh<int> (Matrix<int>);
+//template Matrix<int> atanh<int> (Matrix<int>);
+//template Matrix<int> exp<int> (Matrix<int>);
+//template Matrix<int> log<int> (Matrix<int>);
+//template Matrix<int> log10<int> (Matrix<int>);
+template Matrix<int> ceil<int> (Matrix<int>);
+template Matrix<int> round<int> (Matrix<int>);
+template Matrix<int> floor<int> (Matrix<int>);
+//-------------------------------------------------------------------------------//
+//--------------------------------------------------------------------------------//
+//-----------------------------Int Template---------------------------------------//
+template class Matrix<double>;
+//template Matrix<double> operator+<double> (double, Matrix<double>);
+//template Matrix<double> operator-<double> (double, Matrix<double>);
+template Matrix<double> operator*<double> (double, Matrix<double>);
+template Matrix<double> operator/<double> (double, Matrix<double>);
+template Matrix<double> diff<double> (Matrix<double>, double);
+//template double max<double> (Matrix<double>);
+//template double min<double> (Matrix<double>);
+template double norm<double> (Matrix<double>);
+template Matrix<double> abs<double> (Matrix<double>);
+template Matrix<double> cos<double> (Matrix<double>);
+template Matrix<double> sin<double> (Matrix<double>);
+template Matrix<double> tan<double> (Matrix<double>);
+template Matrix<double> acos<double> (Matrix<double>);
+template Matrix<double> asin<double> (Matrix<double>);
+template Matrix<double> atan<double> (Matrix<double>);
+template Matrix<double> cosh<double> (Matrix<double>);
+template Matrix<double> sinh<double> (Matrix<double>);
+template Matrix<double> tanh<double> (Matrix<double>);
+template Matrix<double> acosh<double> (Matrix<double>);
+template Matrix<double> asinh<double> (Matrix<double>);
+template Matrix<double> atanh<double> (Matrix<double>);
+template Matrix<double> exp<double> (Matrix<double>);
+template Matrix<double> log<double> (Matrix<double>);
+template Matrix<double> log10<double> (Matrix<double>);
+template Matrix<double> ceil<double> (Matrix<double>);
+template Matrix<double> round<double> (Matrix<double>);
+template Matrix<double> floor<double> (Matrix<double>);
+//-------------------------------------------------------------------------------//
+//--------------------------------------------------------------------------------//
+//-----------------------------Int Template---------------------------------------//
+template class Matrix<float>;
+//template Matrix<float> operator+<float> (float, Matrix<float>);
+//template Matrix<float> operator-<float> (float, Matrix<float>);
+template Matrix<float> operator*<float> (float, Matrix<float>);
+template Matrix<float> operator/<float> (float, Matrix<float>);
+template Matrix<float> diff<float> (Matrix<float>, float);
+//template float max<float> (Matrix<float>);
+//template float min<float> (Matrix<float>);
+template float norm<float> (Matrix<float>);
+template Matrix<float> abs<float> (Matrix<float>);
+template Matrix<float> cos<float> (Matrix<float>);
+template Matrix<float> sin<float> (Matrix<float>);
+template Matrix<float> tan<float> (Matrix<float>);
+template Matrix<float> acos<float> (Matrix<float>);
+template Matrix<float> asin<float> (Matrix<float>);
+template Matrix<float> atan<float> (Matrix<float>);
+template Matrix<float> cosh<float> (Matrix<float>);
+template Matrix<float> sinh<float> (Matrix<float>);
+template Matrix<float> tanh<float> (Matrix<float>);
+template Matrix<float> acosh<float> (Matrix<float>);
+template Matrix<float> asinh<float> (Matrix<float>);
+template Matrix<float> atanh<float> (Matrix<float>);
+template Matrix<float> exp<float> (Matrix<float>);
+template Matrix<float> log<float> (Matrix<float>);
+template Matrix<float> log10<float> (Matrix<float>);
+template Matrix<float> ceil<float> (Matrix<float>);
+template Matrix<float> round<float> (Matrix<float>);
+template Matrix<float> floor<float> (Matrix<float>);
+//-------------------------------------------------------------------------------//
 
-
-
-
-
-
+//template class Matrix<complex>;
+////template Matrix<complex> operator+<complex> (complex, Matrix<complex>);
+////template Matrix<complex> operator-<complex> (complex, Matrix<complex>);
+//template Matrix<complex> operator*<complex> (complex, Matrix<complex>);
+//template Matrix<complex> operator/<complex> (complex, Matrix<complex>);
+//template Matrix<complex> diff<complex> (Matrix<complex>, complex);
+////template complex max<complex> (Matrix<complex>);
+////template complex min<complex> (Matrix<complex>);
+//template complex norm<complex> (Matrix<complex>);
+//template Matrix<complex> abs<complex> (Matrix<complex>);
+//template Matrix<complex> cos<complex> (Matrix<complex>);
+//template Matrix<complex> sin<complex> (Matrix<complex>);
+//template Matrix<complex> tan<complex> (Matrix<complex>);
+//template Matrix<complex> acos<complex> (Matrix<complex>);
+//template Matrix<complex> asin<complex> (Matrix<complex>);
+//template Matrix<complex> atan<complex> (Matrix<complex>);
+//template Matrix<complex> cosh<complex> (Matrix<complex>);
+//template Matrix<complex> sinh<complex> (Matrix<complex>);
+//template Matrix<complex> tanh<complex> (Matrix<complex>);
+//template Matrix<complex> acosh<complex> (Matrix<complex>);
+//template Matrix<complex> asinh<complex> (Matrix<complex>);
+//template Matrix<complex> atanh<complex> (Matrix<complex>);
+//template Matrix<complex> exp<complex> (Matrix<complex>);
+//template Matrix<complex> log<complex> (Matrix<complex>);
+//template Matrix<complex> log10<complex> (Matrix<complex>);
+//template Matrix<complex> ceil<complex> (Matrix<complex>);
+//template Matrix<complex> round<complex> (Matrix<complex>);
+//template Matrix<complex> floor<complex> (Matrix<complex>);
 
 
